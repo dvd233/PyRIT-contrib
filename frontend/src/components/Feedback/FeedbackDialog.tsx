@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import {
   Dialog,
   DialogSurface,
@@ -180,6 +180,7 @@ export default function FeedbackDialog({ open, onClose, context }: FeedbackDialo
   // The confirmation dialog opens from state rather than a DialogTrigger. Mark
   // its submit button so Tabster can restore the outer dialog after it closes.
   const confirmRestoreFocusTarget = useRestoreFocusTarget()
+  const submitButtonRef = useRef<HTMLButtonElement>(null)
 
   const update = (name: keyof DialogFields, value: string) =>
     setFields((prev) => ({ ...prev, [name]: value }))
@@ -228,6 +229,8 @@ export default function FeedbackDialog({ open, onClose, context }: FeedbackDialo
   const handleSubmit = () => {
     if (!canSubmit) return
     if (secretMatches.length > 0) {
+      // Enter in the contact field can submit without focusing the restore target.
+      submitButtonRef.current?.focus()
       setConfirmOpen(true)
       return
     }
@@ -367,6 +370,7 @@ export default function FeedbackDialog({ open, onClose, context }: FeedbackDialo
               {isFeedbackCategory(category) && (
                 <Button
                   {...confirmRestoreFocusTarget}
+                  ref={submitButtonRef}
                   appearance="primary"
                   onClick={handleSubmit}
                   disabled={!canSubmit}
